@@ -11,18 +11,21 @@ CIRCLE_RADIUS = CELL_SIZE // 3
 CIRCLE_WIDTH = 15
 CROSS_WIDTH = 25
 SPACE = CELL_SIZE // 4
+WIN_LINE_WIDTH = 10
 
 # Colors
 BG_COLOR = (28, 170, 156)
 LINE_COLOR = (23, 145, 135)
 CIRCLE_COLOR = (239, 231, 200)
 CROSS_COLOR = (84, 84, 84)
+WIN_LINE_COLOR = (255, 0, 0)
 
 class TicTacToe:
     def __init__(self):
         self.board = [[None] * GRID_SIZE for _ in range(GRID_SIZE)]
         self.current_player = "X"
         self.game_over = False
+        self.win_line = None
 
     def draw_lines(self, screen):
         for i in range(1, GRID_SIZE):
@@ -37,6 +40,10 @@ class TicTacToe:
                 elif self.board[row][col] == "X":
                     pygame.draw.line(screen, CROSS_COLOR, (col * CELL_SIZE + SPACE, row * CELL_SIZE + CELL_SIZE - SPACE), (col * CELL_SIZE + CELL_SIZE - SPACE, row * CELL_SIZE + SPACE), CROSS_WIDTH)
                     pygame.draw.line(screen, CROSS_COLOR, (col * CELL_SIZE + SPACE, row * CELL_SIZE + SPACE), (col * CELL_SIZE + CELL_SIZE - SPACE, row * CELL_SIZE + CELL_SIZE - SPACE), CROSS_WIDTH)
+
+    def draw_win_line(self, screen):
+        if self.win_line:
+            pygame.draw.line(screen, WIN_LINE_COLOR, self.win_line[0], self.win_line[1], WIN_LINE_WIDTH)
 
     def mark_square(self, row, col, player):
         self.board[row][col] = player
@@ -54,13 +61,17 @@ class TicTacToe:
     def check_win(self, player):
         for row in range(GRID_SIZE):
             if all([self.board[row][col] == player for col in range(GRID_SIZE)]):
+                self.win_line = ((0, row * CELL_SIZE + CELL_SIZE // 2), (SCREEN_SIZE, row * CELL_SIZE + CELL_SIZE // 2))
                 return True
         for col in range(GRID_SIZE):
             if all([self.board[row][col] == player for row in range(GRID_SIZE)]):
+                self.win_line = ((col * CELL_SIZE + CELL_SIZE // 2, 0), (col * CELL_SIZE + CELL_SIZE // 2, SCREEN_SIZE))
                 return True
         if all([self.board[i][i] == player for i in range(GRID_SIZE)]):
+            self.win_line = ((0, 0), (SCREEN_SIZE, SCREEN_SIZE))
             return True
         if all([self.board[i][GRID_SIZE - 1 - i] == player for i in range(GRID_SIZE)]):
+            self.win_line = ((0, SCREEN_SIZE), (SCREEN_SIZE, 0))
             return True
         return False
 
@@ -96,6 +107,7 @@ def main():
                     game.draw_figures(screen)
                     if game.check_win(game.current_player):
                         game.game_over = True
+                        game.draw_win_line(screen)
                     game.switch_player()
 
                     if not game.game_over and game.current_player == "O":
@@ -103,6 +115,7 @@ def main():
                         game.draw_figures(screen)
                         if game.check_win("O"):
                             game.game_over = True
+                            game.draw_win_line(screen)
                         game.switch_player()
 
         pygame.display.update()
