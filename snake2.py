@@ -22,6 +22,7 @@ class Snake:
         self.positions = [(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)]
         self.direction = random.choice([UP, DOWN, LEFT, RIGHT])
         self.grow = False
+        self.food = None  # Add food attribute
 
     def move(self):
         head_x, head_y = self.positions[0]
@@ -61,18 +62,34 @@ def draw_score(screen, score):
     score_text = font.render(f"Score: {score}", True, (255, 255, 255))
     screen.blit(score_text, (10, 10))
 
-def get_direction(snake_head, food_position):
-    head_x, head_y = snake_head
-    food_x, food_y = food_position
+def get_direction(snake, food):
+    head_x, head_y = snake.positions[0]
+    food_x, food_y = food.position
 
-    if head_x < food_x:
-        return RIGHT
-    elif head_x > food_x:
-        return LEFT
-    elif head_y < food_y:
-        return DOWN
-    elif head_y > food_y:
-        return UP
+    possible_directions = [UP, DOWN, LEFT, RIGHT]
+    safe_directions = []
+
+    for direction in possible_directions:
+        dir_x, dir_y = direction
+        new_head = ((head_x + dir_x * CELL_SIZE) % SCREEN_WIDTH, (head_y + dir_y * CELL_SIZE) % SCREEN_HEIGHT)
+        if new_head not in snake.positions[1:]:
+            safe_directions.append(direction)
+
+    if not safe_directions:
+        return random.choice(possible_directions)
+
+    best_direction = safe_directions[0]
+    min_distance = float('inf')
+
+    for direction in safe_directions:
+        dir_x, dir_y = direction
+        new_head = ((head_x + dir_x * CELL_SIZE) % SCREEN_WIDTH, (head_y + dir_y * CELL_SIZE) % SCREEN_HEIGHT)
+        distance = abs(new_head[0] - food_x) + abs(new_head[1] - food_y)
+        if distance < min_distance:
+            min_distance = distance
+            best_direction = direction
+
+    return best_direction
 
 def main():
     pygame.init()
@@ -80,6 +97,7 @@ def main():
     clock = pygame.time.Clock()
     snake = Snake()
     food = Food()
+    snake.food = food  # Assign food to snake
     score = 0
     fps = FPS  # Use a local variable for FPS
 
@@ -89,7 +107,7 @@ def main():
                 pygame.quit()
                 sys.exit()
 
-        snake.change_direction(get_direction(snake.positions[0], food.position))
+        snake.change_direction(get_direction(snake, food))
 
         try:
             snake.move()
@@ -101,6 +119,7 @@ def main():
         if snake.positions[0] == food.position:
             snake.grow_snake()
             food = Food()
+            snake.food = food  # Update food in snake
             score += 1
             fps += 1  # Increase speed
 
