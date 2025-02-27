@@ -55,5 +55,10 @@ account1.withdraw(200)
 print(account1.get_balance())  # Wyświetli: 1300
 
 print("\n")
+
+print(type(bank))
+print(type(bank.find_account("123456")))
+print(type(bank.find_account("123456").get_balance()))
 print(bank.find_account("123456").get_balance())
+print(bank.find_account("123456").get_owner_name())
 print(bank.find_account("123456").get_owner_name())
