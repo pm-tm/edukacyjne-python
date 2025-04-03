@@ -1,6 +1,7 @@
 import pygame
 import random
 import sys
+import time
 
 # Constants
 SCREEN_WIDTH = 600
@@ -113,8 +114,7 @@ def main():
             snake.move()
         except Exception as e:
             print(f"Game Over! Your score: {score}")
-            pygame.quit()
-            sys.exit()
+            break  # Exit the game loop to restart the game
 
         if snake.positions[0] == food.position:
             snake.grow_snake()
@@ -131,4 +131,6 @@ def main():
         clock.tick(fps)
 
 if __name__ == "__main__":
-    main()
+    while True:
+        main()
+        time.sleep(1)
